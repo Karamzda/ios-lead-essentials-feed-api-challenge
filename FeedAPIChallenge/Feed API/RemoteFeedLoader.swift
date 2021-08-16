@@ -25,7 +25,8 @@ public final class RemoteFeedLoader: FeedLoader {
 				completion(.failure(Error.invalidData))
 			case let .success((data, _)):
 				do {
-					_ = try JSONDecoder().decode([String: String].self, from: data)
+					_ = try JSONDecoder().decode([String: [String]].self, from: data)
+					completion(.success([]))
 				} catch {
 					completion(.failure(Error.invalidData))
 				}
