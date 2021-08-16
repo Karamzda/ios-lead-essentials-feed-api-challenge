@@ -25,8 +25,8 @@ public final class RemoteFeedLoader: FeedLoader {
 				completion(.failure(Error.invalidData))
 			case let .success((data, _)):
 				do {
-					_ = try JSONDecoder().decode([String: [String]].self, from: data)
-					completion(.success([]))
+					let feedImageList = try JSONDecoder().decode(FeedImagesResponse.self, from: data)
+					completion(.success(feedImageList.items.map({ FeedImage(id: $0.id, description: $0.description, location: $0.location, url: $0.url) })))
 				} catch {
 					completion(.failure(Error.invalidData))
 				}
@@ -34,5 +34,23 @@ public final class RemoteFeedLoader: FeedLoader {
 				completion(.failure(Error.connectivity))
 			}
 		}
+	}
+
+	private struct NetworkFeedImage: Decodable {
+		let id: UUID
+		let description: String?
+		let location: String?
+		let url: URL
+
+		private enum CodingKeys: String, CodingKey {
+			case id = "image_id"
+			case description = "image_desc"
+			case location = "image_loc"
+			case url = "image_url"
+		}
+	}
+
+	private struct FeedImagesResponse: Decodable {
+		let items: [NetworkFeedImage]
 	}
 }
